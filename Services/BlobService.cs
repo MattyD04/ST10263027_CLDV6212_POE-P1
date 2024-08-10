@@ -11,7 +11,8 @@ namespace ST10263027_CLDV6212_POE_2_.Services
 
         public BlobService(IConfiguration configuration)
         {
-            _blobServiceClient = new BlobServiceClient(configuration["AzureStorage: DefaultEndpointsProtocol=https;AccountName=matthewdstorage04;AccountKey=5sIl3ZRy3LnTC+B0vUAKkT+s7wktEhtiDEzhT0wOYfj0bnaQHgPZbLoyQR04qrZEEFn7Y+y+7mC++AStnAoZow==;EndpointSuffix=core.windows.net"]);
+            string connectionString = "DefaultEndpointsProtocol=https;AccountName=matthewdstorage04;AccountKey=5sIl3ZRy3LnTC+B0vUAKkT+s7wktEhtiDEzhT0wOYfj0bnaQHgPZbLoyQR04qrZEEFn7Y+y+7mC++AStnAoZow==;EndpointSuffix=core.windows.net";
+            _blobServiceClient = new BlobServiceClient(connectionString);
         }
 
         public async Task UploadBlobAsync(string containerName, string blobName, Stream content)
@@ -22,5 +23,4 @@ namespace ST10263027_CLDV6212_POE_2_.Services
             await blobClient.UploadAsync(content, true);
         }
     }
-
 }
