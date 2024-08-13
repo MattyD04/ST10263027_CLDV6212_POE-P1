@@ -8,7 +8,7 @@ namespace ST10263027_CLDV6212_POE_2_.Services
     public class QueueService
     {
         private readonly QueueServiceClient _queueServiceClient;
-
+        //test
         public QueueService(IConfiguration configuration)
         {
             _queueServiceClient = new QueueServiceClient(configuration["AzureStorage:ConnectionString"]);
