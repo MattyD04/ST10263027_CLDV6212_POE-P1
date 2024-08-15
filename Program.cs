@@ -10,7 +10,7 @@ namespace ST10263027_CLDV6212_POE_2_
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
-
+            
             // Add services to the container.
             builder.Services.AddControllersWithViews();
 
