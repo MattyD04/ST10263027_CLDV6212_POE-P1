@@ -1,26 +1,121 @@
 ﻿@{
     ViewData["Title"] = "Home Page";
 }
+<!--
+    References:
+    https://www.w3schools.com/html/html_css.asp
+    https://youtu.be/wRNinF7YQqQ?si=BdzfIpOQ-ZQ8n66j
+    https://developer.mozilla.org/en-US/docs/Web/HTML/Element/div
+    https://www.w3schools.com/css/css3_buttons.asp
+    https://developer.mozilla.org/en-US/docs/Web/CSS/background-color
+    -->
+<style>
+    body {
+        background: linear-gradient(skyblue, green);
+        background-repeat: no-repeat;
+        background-attachment: fixed;
+    }
+    h1{
+    text-align: center;
+    color: white;
+    padding: 10px 0;
+    margin: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    }
+    .form-container {
+        max-width: 1000px;
+        margin: 20px auto;
+        padding: 20px;
+        background-color: #f9f9f9;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
 
-<form asp-action="UploadImage" method="post" enctype="multipart/form-data">
-    <input type="file" name="file" />
-    <button type="submit">Upload Image</button>
-</form>
+    .form-section {
+        margin-bottom: 20px;
+        padding-bottom: 20px;
+        border-bottom: 1px solid #ddd;
+    }
 
-<form asp-action="AddCustomerProfile" method="post">
-    <input type="text" name="FirstName" placeholder="First Name" />
-    <input type="text" name="LastName" placeholder="Last Name" />
-    <input type="email" name="Email" placeholder="Email" />
-    <input type="text" name="PhoneNumber" placeholder="Phone Number" />
-    <button type="submit">Add Profile</button>
-</form>
+        .form-section:last-child {
+            margin-bottom: 0;
+            padding-bottom: 0;
+            border-bottom: none;
+        }
 
-<form asp-action="ProcessOrder" method="post">
-    <input type="text" name="orderId" placeholder="Order ID" />
-    <button type="submit">Process Order</button>
-</form>
+    input[type="text"],
+    input[type="email"],
+    input[type="file"] {
+        width: 100%;
+        padding: 10px;
+        margin-bottom: 10px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        box-sizing: border-box;
+    }
 
-<form asp-action="UploadContract" method="post" enctype="multipart/form-data">
-    <input type="file" name="file" />
-    <button type="submit">Upload Contract</button>
-</form>
+    button[type="submit"] {
+        width: 100%;
+        padding: 10px;
+        background-color: #007bff;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+        button[type="submit"]:hover,
+        button[type="submit"]:focus {
+            background-color: #0056b3;
+            box-shadow: 0 0 8px rgba(0, 123, 255, 0.5);
+            transform: translateY(-2px);
+        }
+
+        button[type="submit"]:active {
+            background-color: #004085;
+            transform: translateY(1px);
+        }
+
+    input[type="file"] {
+        border: 1px solid #ddd;
+        padding: 6px;
+        background-color: white;
+    }
+</style>
+
+<h1>Welcome to ABC Retailing</h1>
+<div class="form-container">
+    <div class="form-section">
+        <form asp-action="AddCustomerProfile" method="post">
+            <p>Please enter your information below:
+            </p>
+            <input type="text" name="FirstName" placeholder="First Name" />
+            <input type="text" name="LastName" placeholder="Last Name" />
+            <input type="email" name="Email" placeholder="Email" />
+            <input type="text" name="PhoneNumber" placeholder="Phone Number" />
+            <button type="submit">Add Profile</button>
+        </form>
+    </div>
+    <div class="form-section">
+        <p>Select the image you wish to upload:</p>
+        <form asp-action="UploadImage" method="post" enctype="multipart/form-data">
+            <input type="file" name="file" />
+            <button type="submit">Upload Image</button>
+        </form>
+    </div>
+    <div class="form-section">
+        <p>Upload your contract below:</p>
+        <form asp-action="UploadContract" method="post" enctype="multipart/form-data">
+            <input type="file" name="file" />
+            <button type="submit">Upload Contract</button>
+        </form>
+    </div>
+    <div class="form-section">
+        <p>Enter the order id for your order and then click process order:</p>
+        <form asp-action="ProcessOrder" method="post">
+            <input type="text" name="orderId" placeholder="Order ID" />
+            <button type="submit">Process Order</button>
+        </form>
+    </div>
+</div>

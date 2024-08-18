@@ -26,6 +26,11 @@ namespace ST10263027_CLDV6212_POE_2_.Controllers
             return View();
         }
 
+        public IActionResult Privacy()
+        {
+            return View();
+        }
+
         [HttpPost]
         public async Task<IActionResult> UploadImage(IFormFile file)
         {
