@@ -16,13 +16,19 @@
         background-attachment: fixed;
     }
 
-    h1{
-    text-align: center;
-    color: white;
-    padding: 10px 0;
-    margin: 0;
-    background-color: rgba(0, 0, 0, 0.5);
+    .header-container {
+        max-width: 1000px;
+        margin: 0 auto;
     }
+
+    h1 {
+        text-align: center;
+        color: white;
+        padding: 10px 0;
+        margin: 0;
+        background-color: rgba(0, 0, 0, 0.5);
+    }
+
     .form-container {
         max-width: 1000px;
         margin: 20px auto;
@@ -85,11 +91,15 @@
     }
 </style>
 
-<h1>Welcome to ABC Retailing</h1>
+<div class="header-container">
+    <h1>Welcome to ABC Retailing</h1>
+</div>
+
 <div class="form-container">
     <div class="form-section">
         <form asp-action="AddCustomerProfile" method="post">
-            <p>Please enter your information below:
+            <p>
+                Please enter your information below:
             </p>
             <input type="text" name="FirstName" placeholder="First Name" />
             <input type="text" name="LastName" placeholder="Last Name" />
