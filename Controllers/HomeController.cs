@@ -1,7 +1,10 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
 using ST10263027_CLDV6212_POE_2_.Models;
 using ST10263027_CLDV6212_POE_2_.Services;
-using System.Diagnostics;
+using System.IO;
+using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Threading.Tasks;
 
 namespace ST10263027_CLDV6212_POE_2_.Controllers
@@ -29,6 +32,17 @@ namespace ST10263027_CLDV6212_POE_2_.Controllers
             return View();
         }
 
+        // Adds Customer Profile to Azure Table
+        [HttpPost]
+        public async Task<IActionResult> AddCustomerProfile(CustomerProfile profile)
+        {
+            if (ModelState.IsValid)
+            {
+                await _tableService.AddEntityAsync(profile);
+                ViewBag.Message = "Customer profile added successfully!";
+            }
+            return View("Index", profile);
+        }
         // Uploads image to Azure Blob Storage
         [HttpPost]
         public async Task<IActionResult> UploadImage(IFormFile file)
