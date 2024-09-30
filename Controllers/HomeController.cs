@@ -66,17 +66,23 @@ namespace ST10263027_CLDV6212_POE_2_.Controllers
             }
             return View("Index");
         }
-        // Uploads file to Azure File Share
         [HttpPost]
-        public async Task<IActionResult> UploadFileToAzure(IFormFile file)
+        public async Task<IActionResult> UploadContract(IFormFile file)
         {
             if (file != null && file.Length > 0)
             {
                 using var stream = file.OpenReadStream();
-                await _fileService.UploadFileAsync("fileshare", file.FileName, stream);
-                ViewBag.Message = "File uploaded successfully!";
+                await _fileService.UploadFileAsync("contracts", file.FileName, stream); 
+                ViewBag.Message = "Contract uploaded successfully!";
+            }
+            else
+            {
+                ViewBag.Message = "Please select a contract file.";
             }
             return View("Index");
         }
+
+
+
     }
 }
