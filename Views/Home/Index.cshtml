@@ -94,7 +94,6 @@
     footer {
         display: none;
     }
-
 </style>
 
 <div class="header-container">
@@ -102,36 +101,58 @@
 </div>
 
 <div class="form-container">
+    <!-- Customer Profile Form -->
     <div class="form-section">
-        <form asp-action="AddCustomerProfile" method="post">
-            <p>
-                Please enter your information below:
-            </p>
-            <input type="text" name="FirstName" placeholder="First Name" />
-            <input type="text" name="LastName" placeholder="Last Name" />
-            <input type="email" name="Email" placeholder="Email" />
-            <input type="text" name="PhoneNumber" placeholder="Phone Number" />
-            <button type="submit">Add Profile</button>
+        <form asp-action="StoreTableInfo" method="post" enctype="multipart/form-data">
+            <div>
+                <label for="first-name">First name:</label>
+                <input type="text" id="first-name" name="FirstName" value="" required>
+            </div>
+            <div>
+                <label for="last-name">Last name:</label>
+                <input type="text" id="last-name" name="LastName" value="" required>
+            </div>
+            <div>
+                <label for="phone-number">Phone number:</label>
+                <input type="text" id="phone-number" name="PhoneNumber" value="" required>
+            </div>
+            <div>
+                <label for="email">Email:</label>
+                <input type="email" id="email" name="Email" value="" required>
+            </div>
+            <div>
+                <button type="submit">Add profile</button>
+            </div>
         </form>
     </div>
-    <div class="form-section">
-        <p>Select the image you wish to upload:</p>
-        <form asp-action="UploadImage" method="post" enctype="multipart/form-data">
-            <input type="file" name="file" />
-            <button type="submit">Upload Image</button>
-        </form>
-    </div>
-    <form asp-action="UploadContract" method="post" enctype="multipart/form-data">
-        <p>Upload your contract below</p>
-        <input type="file" name="file" />
-        <button type="submit">Upload Contract</button>
-    </form>
 
+    <!-- File Upload Forms -->
     <div class="form-section">
-        <p>Enter the order id for your order and then click process order:</p>
-        <form asp-action="ProcessOrder" method="post">
-            <input type="text" name="orderId" placeholder="Order ID" />
-            <button type="submit">Process Order</button>
+        <form asp-action="UploadFile" method="post" enctype="multipart/form-data">
+            <div>
+                <label for="contract-file">Upload Contract</label>
+                <input type="file" id="contract-file" name="contractFile">
+                <button type="submit">Submit Contract</button>
+            </div>
+        </form>
+
+        <form asp-action="UploadBlob" method="post" enctype="multipart/form-data">
+            <div>
+                <label for="image-file">Upload Image</label>
+                <input type="file" id="image-file" name="imageFile">
+                <button type="submit">Submit Image</button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Order Processing Form -->
+    <div class="form-section">
+        <form asp-action="ProcessQueueMessage" method="post">
+            <div>
+                <label for="order-id">Order ID:</label>
+                <input type="text" id="order-id" name="orderId" placeholder="Order ID" required>
+                <button type="submit">Process Order</button>
+            </div>
         </form>
     </div>
 </div>

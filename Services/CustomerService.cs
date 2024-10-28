@@ -26,7 +26,7 @@ namespace ST10263027_CLDV6212_POE_2_.Services
                 {
                     SqlCommand command = new SqlCommand(query, connection);
                     command.Parameters.AddWithValue("@FirstName", profile.FirstName);
-                    command.Parameters.AddWithValue("@SecondName", profile.LastName);
+                    command.Parameters.AddWithValue("@SecondName", profile.SecondName);
                     command.Parameters.AddWithValue("@Email", profile.Email);
                     command.Parameters.AddWithValue("@PhoneNumber", profile.PhoneNumber);
 
