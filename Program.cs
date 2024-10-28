@@ -13,14 +13,12 @@ namespace ST10263027_CLDV6212_POE_2_
 
             var builder = WebApplication.CreateBuilder(args);
 
-            // Add services to the container.
+            builder.Services.AddHttpClient();
             builder.Services.AddControllersWithViews();
 
-            // Register custom services
-            builder.Services.AddSingleton<BlobService>();
-            builder.Services.AddSingleton<TableService>();
-            builder.Services.AddSingleton<QueueService>();
-            builder.Services.AddSingleton<FileService>();
+            // Register the services for dependency injection
+            builder.Services.AddScoped<CustomerService>();
+            builder.Services.AddScoped<BlobService>();
 
             var app = builder.Build();
 

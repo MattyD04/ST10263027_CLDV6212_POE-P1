@@ -11,78 +11,111 @@ namespace ST10263027_CLDV6212_POE_2_.Controllers
 {
     public class HomeController : Controller
     {
-        private readonly BlobService _blobService;
-        private readonly TableService _tableService;
-        private readonly QueueService _queueService;
-        private readonly FileService _fileService;
+        private readonly IHttpClientFactory _httpClientFactory;
+        private readonly ILogger<HomeController> _logger;
+        private readonly IConfiguration _configuration;
+        private readonly CustomerService _customerService; // Inject CustomerService
+        private readonly BlobService _blobService; // Inject BlobService
 
-        public HomeController(BlobService blobService, TableService tableService, QueueService queueService, FileService fileService)
+        public HomeController(IHttpClientFactory httpClientFactory, ILogger<HomeController> logger, IConfiguration configuration, CustomerService customerService, BlobService blobService)
         {
+            _httpClientFactory = httpClientFactory;
+            _logger = logger;
+            _configuration = configuration;
+            _customerService = customerService;
             _blobService = blobService;
-            _tableService = tableService;
-            _queueService = queueService;
-            _fileService = fileService;
         }
+
+        // Action for Index page
         public IActionResult Index()
         {
-            return View(new CustomerProfile());
-        }
-        public IActionResult Privacy()
-        {
-            return View();
+            var model = new CustomerProfile();
+            return View(model);
         }
 
-        // Adds Customer Profile to Azure Table
+        // Existing method to store customer info in Table storage and new SQL insertion
         [HttpPost]
-        public async Task<IActionResult> AddCustomerProfile(CustomerProfile profile)
+        public async Task<IActionResult> StoreTableInfo(CustomerProfile profile)
         {
             if (ModelState.IsValid)
             {
-                await _tableService.AddEntityAsync(profile);
-                ViewBag.Message = "Customer profile added successfully!";
+                try
+                {
+                    // Call Azure function to store data in Azure Table
+                    using var httpClient = _httpClientFactory.CreateClient();
+                    var baseUrl = _configuration["AzureFunctions:StoreTableInfo"];
+                    var requestUri = $"{baseUrl}&tableName=CustomerProfiles&partitionKey={profile.PartitionKey}&rowKey={profile.RowKey}&firstName={profile.FirstName}&lastName={profile.LastName}&phoneNumber={profile.PhoneNumber}&Email={profile.Email}";
+
+                    var response = await httpClient.PostAsync(requestUri, null);
+
+                    if (response.IsSuccessStatusCode)
+                    {
+                        // Insert customer data into SQL database
+                        await _customerService.InsertCustomerAsync(profile);
+                        return RedirectToAction("Index");
+                    }
+                    else
+                    {
+                        _logger.LogError($"Error submitting client info: {response.ReasonPhrase}");
+                    }
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError($"Exception occurred while submitting client info: {ex.Message}");
+                }
             }
+
             return View("Index", profile);
         }
-        // Uploads image to Azure Blob Storage
+
+        // Existing method to upload blob and new SQL insertion for blob data
         [HttpPost]
-        public async Task<IActionResult> UploadImage(IFormFile file)
+        public async Task<IActionResult> UploadBlob(IFormFile imageFile)
         {
-            if (file != null && file.Length > 0)
+            if (imageFile != null)
             {
-                using var stream = file.OpenReadStream();
-                await _blobService.UploadBlobAsync("product-images", file.FileName, stream);
-                ViewBag.Message = "Image uploaded successfully!";
-            }
-            return View("Index");
-        }
-        // Sends a message to the Azure Queue
-        [HttpPost]
-        public async Task<IActionResult> ProcessOrder(string orderId)
-        {
-            if (!string.IsNullOrEmpty(orderId))
-            {
-                await _queueService.SendMessageAsync("order-processing", $"Processing order {orderId}");
-                ViewBag.Message = "Order processed successfully!";
-            }
-            return View("Index");
-        }
-        [HttpPost]
-        public async Task<IActionResult> UploadContract(IFormFile file)
-        {
-            if (file != null && file.Length > 0)
-            {
-                using var stream = file.OpenReadStream();
-                await _fileService.UploadFileAsync("contracts", file.FileName, stream); 
-                ViewBag.Message = "Contract uploaded successfully!";
+                try
+                {
+                    // Call Azure function to upload the blob
+                    using var httpClient = _httpClientFactory.CreateClient();
+                    using var stream = imageFile.OpenReadStream();
+                    var content = new StreamContent(stream);
+                    content.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue(imageFile.ContentType);
+
+                    var baseUrl = _configuration["AzureFunctions:UploadBlob"];
+                    string url = $"{baseUrl}&blobName={imageFile.FileName}";
+                    var response = await httpClient.PostAsync(url, content);
+
+                    if (response.IsSuccessStatusCode)
+                    {
+                        // Convert image to byte array for SQL insertion
+                        using (var memoryStream = new MemoryStream())
+                        {
+                            await imageFile.CopyToAsync(memoryStream);
+                            var imageData = memoryStream.ToArray();
+
+                            // Insert image data into SQL BlobTable
+                            await _blobService.InsertBlobAsync(imageData);
+                        }
+
+                        return RedirectToAction("Index");
+                    }
+                    else
+                    {
+                        _logger.LogError($"Error submitting image: {response.ReasonPhrase}");
+                    }
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError($"Exception occurred while submitting image: {ex.Message}");
+                }
             }
             else
             {
-                ViewBag.Message = "Please select a contract file.";
+                _logger.LogError("No image file provided.");
             }
+
             return View("Index");
         }
-
-
-
     }
 }
