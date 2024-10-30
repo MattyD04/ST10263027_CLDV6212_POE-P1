@@ -13,14 +13,17 @@ builder.Services.AddControllersWithViews();
 // Add configuration
 builder.Services.AddSingleton<IConfiguration>(builder.Configuration);
 
-// Register services
+// Register application services
 builder.Services.AddScoped<CustomerService>();
+builder.Services.AddScoped<OrderService>(); // Register OrderService
 builder.Services.AddScoped<BlobService>(provider =>
 {
     var configuration = provider.GetRequiredService<IConfiguration>();
-    var connectionString = configuration.GetConnectionString("DefaultConnection"); // Make sure this matches your appsettings.json
+    var connectionString = configuration.GetConnectionString("DefaultConnection"); // Ensure this matches your appsettings.json
     return new BlobService(connectionString);
 });
+
+// Configure logging
 builder.Services.AddLogging();
 
 var app = builder.Build();
@@ -37,6 +40,7 @@ app.UseStaticFiles();
 app.UseRouting();
 app.UseAuthorization();
 
+// Define the default route
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");

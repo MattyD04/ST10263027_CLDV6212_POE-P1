@@ -18,15 +18,17 @@ namespace ST10263027_CLDV6212_POE_2_.Controllers
         private readonly ILogger<HomeController> _logger;
         private readonly IConfiguration _configuration;
         private readonly CustomerService _customerService;
+        private readonly OrderService _orderService; // New OrderService instance
         private readonly BlobService _blobService;
 
         public HomeController(IHttpClientFactory httpClientFactory, ILogger<HomeController> logger,
-            IConfiguration configuration, CustomerService customerService)
+            IConfiguration configuration, CustomerService customerService, OrderService orderService) // Injecting OrderService
         {
             _httpClientFactory = httpClientFactory;
             _logger = logger;
             _configuration = configuration;
             _customerService = customerService;
+            _orderService = orderService; // Initializing OrderService
 
             // Initialize BlobService with the connection string
             var connectionString = _configuration.GetConnectionString("DefaultConnection");
@@ -98,6 +100,37 @@ namespace ST10263027_CLDV6212_POE_2_.Controllers
         }
 
         [HttpPost]
+        public async Task<IActionResult> InsertOrder(OrderProfile order)
+        {
+            if (!ModelState.IsValid)
+            {
+                _logger.LogWarning("Invalid model state for order");
+                return View("Index", order);
+            }
+
+            try
+            {
+                // Insert order into SQL database
+                var sqlInsertSuccess = await _orderService.InsertOrderAsync(order);
+                if (!sqlInsertSuccess)
+                {
+                    _logger.LogError("Failed to insert order data into SQL database");
+                    ModelState.AddModelError("", "Failed to save order information");
+                    return View("Index", order);
+                }
+
+                TempData["SuccessMessage"] = "Order created successfully!";
+                return RedirectToAction("Index");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error processing order submission");
+                ModelState.AddModelError("", "An error occurred while processing your order");
+                return View("Index", order);
+            }
+        }
+
+        [HttpPost]
         public async Task<IActionResult> UploadBlob(IFormFile imageFile)
         {
             if (imageFile == null || imageFile.Length == 0)
@@ -162,6 +195,5 @@ namespace ST10263027_CLDV6212_POE_2_.Controllers
 
             return View("Index");
         }
-
     }
 }
