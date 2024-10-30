@@ -9,7 +9,7 @@
     https://developer.mozilla.org/en-US/docs/Web/HTML/Element/div
     https://www.w3schools.com/css/css3_buttons.asp
     https://developer.mozilla.org/en-US/docs/Web/CSS/background-color
-    -->
+-->
 <style>
     body {
         background: linear-gradient(skyblue, green);
@@ -85,12 +85,6 @@
             transform: translateY(1px);
         }
 
-    input[type="file"] {
-        border: 1px solid #ddd;
-        padding: 6px;
-        background-color: white;
-    }
-
     footer {
         display: none;
     }
@@ -103,35 +97,37 @@
 <div class="form-container">
     <!-- Customer Profile Form -->
     <div class="form-section">
+        <h2>Customer Profile Submission</h2>
         <form asp-action="StoreTableInfo" method="post" enctype="multipart/form-data">
             <div>
-                <label for="first-name">First name:</label>
-                <input type="text" id="first-name" name="FirstName" value="" required>
+                <label for="first-name">First Name:</label>
+                <input type="text" id="first-name" name="FirstName" required>
             </div>
             <div>
-                <label for="last-name">Last name:</label>
-                <input type="text" id="last-name" name="LastName" value="" required>
+                <label for="last-name">Last Name:</label>
+                <input type="text" id="last-name" name="SecondName" required>
             </div>
             <div>
-                <label for="phone-number">Phone number:</label>
-                <input type="text" id="phone-number" name="PhoneNumber" value="" required>
+                <label for="phone-number">Phone Number:</label>
+                <input type="text" id="phone-number" name="PhoneNumber" required>
             </div>
             <div>
                 <label for="email">Email:</label>
-                <input type="email" id="email" name="Email" value="" required>
+                <input type="email" id="email" name="Email" required>
             </div>
             <div>
-                <button type="submit">Add profile</button>
+                <button type="submit">Add Profile</button>
             </div>
         </form>
     </div>
 
     <!-- File Upload Forms -->
     <div class="form-section">
+        <h2>File Upload</h2>
         <form asp-action="UploadFile" method="post" enctype="multipart/form-data">
             <div>
                 <label for="contract-file">Upload Contract</label>
-                <input type="file" id="contract-file" name="contractFile">
+                <input type="file" id="contract-file" name="contractFile" required>
                 <button type="submit">Submit Contract</button>
             </div>
         </form>
@@ -139,7 +135,7 @@
         <form asp-action="UploadBlob" method="post" enctype="multipart/form-data">
             <div>
                 <label for="image-file">Upload Image</label>
-                <input type="file" id="image-file" name="imageFile">
+                <input type="file" id="image-file" name="imageFile" required>
                 <button type="submit">Submit Image</button>
             </div>
         </form>
@@ -147,6 +143,7 @@
 
     <!-- Order Processing Form -->
     <div class="form-section">
+        <h2>Process Order</h2>
         <form asp-action="ProcessQueueMessage" method="post">
             <div>
                 <label for="order-id">Order ID:</label>
@@ -155,4 +152,5 @@
             </div>
         </form>
     </div>
+
 </div>
