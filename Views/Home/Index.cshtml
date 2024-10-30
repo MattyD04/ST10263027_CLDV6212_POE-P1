@@ -124,14 +124,6 @@
     <!-- File Upload Forms -->
     <div class="form-section">
         <h2>File Upload</h2>
-        <form asp-action="UploadFile" method="post" enctype="multipart/form-data">
-            <div>
-                <label for="contract-file">Upload Contract</label>
-                <input type="file" id="contract-file" name="contractFile" required>
-                <button type="submit">Submit Contract</button>
-            </div>
-        </form>
-
         <form asp-action="UploadBlob" method="post" enctype="multipart/form-data">
             <div>
                 <label for="image-file">Upload Image</label>
