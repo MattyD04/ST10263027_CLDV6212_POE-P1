@@ -1,13 +1,15 @@
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using ST10263027_CLDV6212_POE_2_.Models;
 using ST10263027_CLDV6212_POE_2_.Services;
+using System;
 using System.IO;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
 
-//code corrections by Claude AI
 namespace ST10263027_CLDV6212_POE_2_.Controllers
 {
     public class HomeController : Controller
@@ -15,27 +17,28 @@ namespace ST10263027_CLDV6212_POE_2_.Controllers
         private readonly IHttpClientFactory _httpClientFactory;
         private readonly ILogger<HomeController> _logger;
         private readonly IConfiguration _configuration;
-        private readonly CustomerService _customerService; // Inject CustomerService
-        private readonly BlobService _blobService; // Inject BlobService
+        private readonly CustomerService _customerService;
+        private readonly BlobService _blobService;
 
-        public HomeController(IHttpClientFactory httpClientFactory, ILogger<HomeController> logger, IConfiguration configuration, CustomerService customerService, BlobService blobService)
+        public HomeController(IHttpClientFactory httpClientFactory, ILogger<HomeController> logger,
+            IConfiguration configuration, CustomerService customerService)
         {
             _httpClientFactory = httpClientFactory;
             _logger = logger;
             _configuration = configuration;
             _customerService = customerService;
-            _blobService = blobService;
+
+            // Initialize BlobService with the connection string
+            var connectionString = _configuration.GetConnectionString("DefaultConnection");
+            _blobService = new BlobService(connectionString);
         }
 
-        // Action for Index page
         public IActionResult Index()
         {
             var model = new CustomerProfile();
             return View(model);
         }
 
-        // Existing method to store customer info in Table storage and new SQL insertion
-        // Modified HomeController.cs StoreTableInfo method
         [HttpPost]
         public async Task<IActionResult> StoreTableInfo(CustomerProfile profile)
         {
@@ -94,54 +97,71 @@ namespace ST10263027_CLDV6212_POE_2_.Controllers
             }
         }
 
-        // Existing method to upload blob and new SQL insertion for blob data
         [HttpPost]
         public async Task<IActionResult> UploadBlob(IFormFile imageFile)
         {
-            if (imageFile != null)
+            if (imageFile == null || imageFile.Length == 0)
             {
-                try
+                _logger.LogError("No image file provided or file is empty");
+                ModelState.AddModelError("", "Please select a valid image file");
+                return View("Index");
+            }
+
+            try
+            {
+                // Convert image to byte array for SQL insertion
+                using (var memoryStream = new MemoryStream())
                 {
-                    // Call Azure function to upload the blob
-                    using var httpClient = _httpClientFactory.CreateClient();
-                    using var stream = imageFile.OpenReadStream();
-                    var content = new StreamContent(stream);
-                    content.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue(imageFile.ContentType);
+                    await imageFile.CopyToAsync(memoryStream);
+                    var imageData = memoryStream.ToArray();
 
-                    var baseUrl = _configuration["AzureFunctions:UploadBlob"];
-                    string url = $"{baseUrl}&blobName={imageFile.FileName}";
-                    var response = await httpClient.PostAsync(url, content);
+                    // Insert image data into SQL BlobTable
+                    var sqlInsertSuccess = await _blobService.InsertBlobAsync(imageData);
 
-                    if (response.IsSuccessStatusCode)
+                    if (!sqlInsertSuccess)
                     {
-                        // Convert image to byte array for SQL insertion
-                        using (var memoryStream = new MemoryStream())
-                        {
-                            await imageFile.CopyToAsync(memoryStream);
-                            var imageData = memoryStream.ToArray();
+                        _logger.LogError("Failed to insert image data into SQL database");
+                        ModelState.AddModelError("", "Failed to save image to database");
+                        return View("Index");
+                    }
 
-                            // Insert image data into SQL BlobTable
-                            await _blobService.InsertBlobAsync(imageData);
-                        }
+                    // Call Azure function to upload the blob if necessary
+                    using var httpClient = _httpClientFactory.CreateClient();
+                    var baseUrl = _configuration["AzureFunctions:UploadBlob"];
+                    if (string.IsNullOrEmpty(baseUrl))
+                    {
+                        _logger.LogError("Azure Functions URL is not configured");
+                        ModelState.AddModelError("", "Server configuration error");
+                        return View("Index");
+                    }
 
-                        return RedirectToAction("Index");
+                    string url = $"{baseUrl}&blobName={Uri.EscapeDataString(imageFile.FileName)}";
+                    var content = new StreamContent(memoryStream);
+                    content.Headers.ContentType = new MediaTypeHeaderValue(imageFile.ContentType);
+
+                    var response = await httpClient.PostAsync(url, content);
+                    if (!response.IsSuccessStatusCode)
+                    {
+                        _logger.LogError("Failed to upload image to Azure Blob Storage: {StatusCode} - {Reason}",
+                            response.StatusCode, response.ReasonPhrase);
+                        ModelState.AddModelError("", "Failed to upload image to cloud storage");
                     }
                     else
                     {
-                        _logger.LogError($"Error submitting image: {response.ReasonPhrase}");
+                        TempData["SuccessMessage"] = "Image uploaded successfully!";
                     }
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogError($"Exception occurred while submitting image: {ex.Message}");
+
+                    return RedirectToAction("Index");
                 }
             }
-            else
+            catch (Exception ex)
             {
-                _logger.LogError("No image file provided.");
+                _logger.LogError(ex, "Error processing image upload: {Message}", ex.Message);
+                ModelState.AddModelError("", "An error occurred while processing your image");
             }
 
             return View("Index");
         }
+
     }
 }
