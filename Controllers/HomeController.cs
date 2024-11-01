@@ -18,19 +18,18 @@ namespace ST10263027_CLDV6212_POE_2_.Controllers
         private readonly ILogger<HomeController> _logger;
         private readonly IConfiguration _configuration;
         private readonly CustomerService _customerService;
-        private readonly OrderService _orderService; // New OrderService instance
+        private readonly OrderService _orderService;
         private readonly BlobService _blobService;
 
         public HomeController(IHttpClientFactory httpClientFactory, ILogger<HomeController> logger,
-            IConfiguration configuration, CustomerService customerService, OrderService orderService) // Injecting OrderService
+            IConfiguration configuration, CustomerService customerService, OrderService orderService)
         {
             _httpClientFactory = httpClientFactory;
             _logger = logger;
             _configuration = configuration;
             _customerService = customerService;
-            _orderService = orderService; // Initializing OrderService
+            _orderService = orderService;
 
-            // Initialize BlobService with the connection string
             var connectionString = _configuration.GetConnectionString("DefaultConnection");
             _blobService = new BlobService(connectionString);
         }
@@ -40,6 +39,7 @@ namespace ST10263027_CLDV6212_POE_2_.Controllers
             var model = new CustomerProfile();
             return View(model);
         }
+
 
         [HttpPost]
         public async Task<IActionResult> StoreTableInfo(CustomerProfile profile)
@@ -98,7 +98,6 @@ namespace ST10263027_CLDV6212_POE_2_.Controllers
                 return View("Index", profile);
             }
         }
-
         [HttpPost]
         public async Task<IActionResult> InsertOrder(OrderProfile order)
         {

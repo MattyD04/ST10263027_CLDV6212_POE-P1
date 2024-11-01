@@ -121,9 +121,9 @@
         </form>
     </div>
 
-    <!-- File Upload Forms -->
+    <!-- Image Upload Forms -->
     <div class="form-section">
-        <h2>File Upload</h2>
+        <h2>Image Upload</h2>
         <form asp-action="UploadBlob" method="post" enctype="multipart/form-data">
             <div>
                 <label for="image-file">Upload Image</label>
@@ -136,10 +136,10 @@
     <!-- Order Processing Form -->
     <div class="form-section">
         <h2>Process Order</h2>
-        <form asp-action="ProcessQueueMessage" method="post">
+        <form asp-action="InsertOrder" method="post" model="@Model">
             <div>
-                <label for="order-id">Order ID:</label>
-                <input type="text" id="order-id" name="orderId" placeholder="Order ID" required>
+                <label for="order-number">Order Number:</label>
+                <input type="text" id="order-number" name="OrderNumber" placeholder="Order Number" required>
                 <button type="submit">Process Order</button>
             </div>
         </form>
